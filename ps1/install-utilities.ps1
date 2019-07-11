@@ -6,13 +6,11 @@ If(!(test-path $sysinternalsDir)) {
   New-Item -ItemType Directory -Force -Path $sysinternalsDir
 } Else {
   Write-Host "Tools directory exists. Exiting."
-  exit
 }
 If(!(test-path $sysmonDir)) {
   New-Item -ItemType Directory -Force -Path $sysmonDir
 } Else {
   Write-Host "Sysmon directory exists. Exiting."
-  exit
 }
 $autorunsPath = "C:\Tools\Sysinternals\Autoruns64.exe"
 $sysmonPath = "C:\Tools\Sysinternals\Sysmon.exe"
@@ -51,10 +49,8 @@ If (-not (Test-Path "C:\ProgramData\chocolatey")) {
 }
 
 Write-Host "Installing Notepad++, Chrome, WinRar, Firefox."
-If ($(hostname) -eq "win10") {
   # Because the Windows10 start menu sucks
-  choco install -y classic-shell -installArgs ADDLOCAL=ClassicStartMenu
-}
+choco install -y classic-shell -installArgs ADDLOCAL=ClassicStartMenu
 choco install -y NotepadPlusPlus
 choco install -y GoogleChrome
 choco install -y Firefox
