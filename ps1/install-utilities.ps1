@@ -74,3 +74,59 @@ If ((Get-Service -name splunkforwarder).Status -ne "Running")
 }
 Write-Host "$('[{0:HH:mm}]' -f (Get-Date)) Splunk installation complete!"
 
+# Debloat Windows
+if ($env:PACKER_BUILDER_TYPE -And $($env:PACKER_BUILDER_TYPE).startsWith("hyperv")) {
+  Write-Host Skip debloat steps in Hyper-V build.
+} else {
+  Write-Host Downloading debloat zip
+  # GitHub requires TLS 1.2 as of 2/1/2018
+  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+  $url="https://github.com/StefanScherer/Debloat-Windows-10/archive/master.zip"
+  (New-Object System.Net.WebClient).DownloadFile($url, "$env:TEMP\debloat.zip")
+  Expand-Archive -Path $env:TEMP\debloat.zip -DestinationPath $env:TEMP -Force
+
+  # Disable Windows Defender
+  Write-host Disable Windows Defender
+  $os = (gwmi win32_operatingsystem).caption
+  if ($os -like "*Windows 10*") {
+    set-MpPreference -DisableRealtimeMonitoring $true
+  } else {
+    Uninstall-WindowsFeature Windows-Defender-Features
+  }
+
+  # Optimize Windows Update
+  Write-host Optimize Windows Update
+  . $env:TEMP\Debloat-Windows-10-master\scripts\optimize-windows-update.ps1
+  Write-host Disable Windows Update
+  Set-Service wuauserv -StartupType Disabled
+
+  # Turn off shutdown event tracking
+  if ( -Not (Test-Path 'registry::HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Reliability'))
+  {
+    New-Item -Path 'registry::HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT' -Name Reliability -Force
+  }
+  Set-ItemProperty -Path 'registry::HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Reliability' -Name ShutdownReasonOn -Value 0
+
+  rm $env:TEMP\debloat.zip
+  rm -recurse $env:TEMP\Debloat-Windows-10-master
+}
+
+# Tweaks
+# Remove OneDrive from the System
+Write-Host "Removing OneDrive..."
+$onedrive = Get-Process onedrive -ErrorAction SilentlyContinue
+if ($onedrive) {
+  taskkill /f /im OneDrive.exe
+}
+c:\Windows\SysWOW64\OneDriveSetup.exe /uninstall
+
+Write-Host "Running Update-Help..."
+Update-Help -Force -ErrorAction SilentlyContinue
+
+Write-Host "Removing Microsoft Store, Mail, and Edge shortcuts from the taskbar..."
+$appname = "Microsoft Edge"
+((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name -eq $appname}).Verbs() | ?{$_.Name.replace('&','') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
+$appname = "Microsoft Store"
+((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name -eq $appname}).Verbs() | ?{$_.Name.replace('&','') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
+$appname = "Mail"
+((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name -eq $appname}).Verbs() | ?{$_.Name.replace('&','') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
