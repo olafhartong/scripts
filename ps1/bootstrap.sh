@@ -61,7 +61,7 @@ install_splunk() {
     # Add a Splunk TCP input on port 9997
     echo -e "[splunktcp://9997]\nconnection_host = ip" > /opt/splunk/etc/apps/search/local/inputs.conf
     # Reboot Splunk to make changes take effect
-    /opt/splunk/bin/splunk set web-port 443
+    /opt/splunk/bin/splunk set web-port 443 -auth 'admin:empty-laboring-Find-Elegant-Droop-Aftermost'
     /opt/splunk/bin/splunk restart
     /opt/splunk/bin/splunk enable boot-start
      fi
