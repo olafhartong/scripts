@@ -70,7 +70,6 @@ install_splunk() {
 
 main() {
   apt_install_prerequisites
-  install_python
   install_splunk
 }
 
