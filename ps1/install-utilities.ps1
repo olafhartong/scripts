@@ -33,7 +33,7 @@ Write-Host "$('[{0:HH:mm}]' -f (Get-Date)) Downloading Sysmon.exe..."
 
 # Download Olaf Hartongs Sysmon config
 Write-Host "$('[{0:HH:mm}]' -f (Get-Date)) Downloading Olaf Hartong's Sysmon config..."
-(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/olafhartong/sysmon-configs/master/sysmonconfig-v9.xml', "$sysmonConfigPath")
+(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/olafhartong/sysmon-configs/master/sysmonconfig-v10.xml', "$sysmonConfigPath")
 
 # Start Sysmon
 Write-Host "$('[{0:HH:mm}]' -f (Get-Date)) Starting Sysmon..."
@@ -55,9 +55,7 @@ If (-not (Test-Path "C:\ProgramData\chocolatey")) {
   Write-Host "Chocolatey is already installed."
 }
 
-Write-Host "Installing Notepad++, Chrome, WinRar, Firefox."
-  # Because the Windows10 start menu sucks
-choco install -y classic-shell -installArgs ADDLOCAL=ClassicStartMenu
+Write-Host "Installing Notepad++, Chrome, 7zip, Firefox."
 choco install -y NotepadPlusPlus
 choco install -y GoogleChrome
 choco install -y Firefox
