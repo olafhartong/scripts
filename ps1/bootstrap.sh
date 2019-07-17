@@ -9,20 +9,6 @@ apt_install_prerequisites() {
   apt-get install -y jq whois build-essential git docker docker-compose unzip htop curl
 }
 
-install_python() {
-  # Install Python 3.6.4
-  if ! which /usr/local/bin/python3.6 > /dev/null; then
-    echo "Installing Python v3.6.4..."
-    wget https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tgz
-    tar -xvf Python-3.6.4.tgz
-    cd Python-3.6.4 || exit
-    ./configure && make && make install
-    cd /home/vagrant || exit
-  else
-    echo "Python seems to be downloaded already.. Skipping."
-  fi
-}
-
 install_splunk() {
   # Check if Splunk is already installed
   if [ -f "/opt/splunk/bin/splunk" ]; then
