@@ -30,6 +30,7 @@ install_splunk() {
     # Install ThreatHunting app
     cd /opt/splunk/etc/apps
     git clone https://github.com/olafhartong/ThreatHunting
+    git clone https://github.com/secops4thewin/link_analysis_app    
     mkdir -p /opt/splunk/etc/users/admin/search/local
     echo -e "[search-tour]\nviewed = 1" > /opt/splunk/etc/system/local/ui-tour.conf
     mkdir /opt/splunk/etc/apps/user-prefs/local
